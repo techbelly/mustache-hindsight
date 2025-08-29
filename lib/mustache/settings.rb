@@ -40,12 +40,36 @@ class Mustache
     alias_method :path=, :template_path=
   end
 
+  def self.template_extension
+    @template_extension ||= inheritable_config_for :template_extension, 'mustache'
+  end
+
   def self.template_extension=(template_extension)
     @template_extension = template_extension
     @template = nil
   end
 
+  def template_extension
+    @template_extension ||= self.class.template_extension
+  end
+
   def self.template=(template)
     @template = templateify(template)
+  end
+
+  def self.view_namespace
+    @view_namespace ||= inheritable_config_for(:view_namespace, Object)
+  end
+
+  def self.view_namespace=(namespace)
+    @view_namespace = namespace
+  end
+
+  def self.view_path
+    @view_path ||= inheritable_config_for(:view_path, '.')
+  end
+
+  def self.view_path=(path)
+    @view_path = path
   end
 end
