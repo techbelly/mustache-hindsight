@@ -7,6 +7,10 @@ class Mustache
 
   private
 
+  def self.compiled?
+    @template.is_a? Template
+  end
+
   def self.templateify(obj, options = {})
     obj.is_a?(Template) ? obj : Template.new(obj, options)
   end

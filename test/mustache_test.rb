@@ -2,6 +2,14 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_knows_when_its_been_compiled_when_set_with_string
+    klass = Class.new(Mustache)
+
+    refute klass.compiled?
+    klass.template = 'Hi, {{person}}!'
+    assert klass.compiled?
+  end
+
   def test_inherited_attributes
     Object.const_set :TestNamespace, Module.new
     base = Class.new(Mustache)
