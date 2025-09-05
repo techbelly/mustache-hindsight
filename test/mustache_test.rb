@@ -2,6 +2,26 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_underscore
+    assert_equal 'template_partial', Mustache.underscore('TemplatePartial')
+    assert_equal 'admin/template_partial', Mustache.underscore('Admin::TemplatePartial')
+    assert_equal 'views/in/sub/directories', Mustache.underscore('Views::In::Sub::Directories')
+  end
+
+  def test_anon_subclass_underscore
+    klass = Class.new(TemplatePartial)
+    assert_equal 'template_partial', klass.underscore
+  end
+
+  def test_namespaced_underscore
+    Object.const_set(:Views, Class.new)
+    klass = Class.new(Mustache)
+    klass.view_namespace = Views
+    assert_equal 'stat_stuff', klass.underscore('Views::StatStuff')
+
+    assert_equal 'views/stat_stuff', Mustache.underscore('Views::StatStuff')
+  end
+
   def test_knows_when_its_been_compiled_when_set_with_string
     klass = Class.new(Mustache)
 

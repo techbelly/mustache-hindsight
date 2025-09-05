@@ -1,6 +1,7 @@
 require 'mustache/enumerable'
 require 'mustache/template'
 require 'mustache/settings'
+require 'mustache/utils'
 
 class Mustache
   
@@ -9,6 +10,12 @@ class Mustache
 
   def self.compiled?
     @template.is_a? Template
+  end
+
+  def self.underscore(classified = name)
+    classified = superclass.name if classified.to_s.empty?
+
+    Mustache::Utils::String.new(classified).underscore(view_namespace)
   end
 
   def self.templateify(obj, options = {})
