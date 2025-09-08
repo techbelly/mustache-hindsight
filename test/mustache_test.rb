@@ -2,6 +2,11 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_classify
+    assert_equal 'TemplatePartial', Mustache.classify('template_partial')
+    assert_equal 'Admin::TemplatePartial', Mustache.classify('admin/template_partial')
+  end
+
   def test_underscore
     assert_equal 'template_partial', Mustache.underscore('TemplatePartial')
     assert_equal 'admin/template_partial', Mustache.underscore('Admin::TemplatePartial')

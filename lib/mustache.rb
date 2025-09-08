@@ -12,6 +12,10 @@ class Mustache
     @template.is_a? Template
   end
 
+  def self.classify(underscored)
+    Mustache::Utils::String.new(underscored).classify
+  end
+
   def self.underscore(classified = name)
     classified = superclass.name if classified.to_s.empty?
 
