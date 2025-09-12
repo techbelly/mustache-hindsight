@@ -8,6 +8,12 @@ class Mustache
 
   private
 
+  def self.view_class(name)
+    name = classify(name.to_s)
+
+    return Mustache if name.to_s.empty?
+  end
+
   def self.compiled?
     @template.is_a? Template
   end
