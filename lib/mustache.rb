@@ -12,6 +12,15 @@ class Mustache
     name = classify(name.to_s)
 
     return Mustache if name.to_s.empty?
+
+    name = "#{view_namespace}::#{name}"
+    const = rescued_const_get(name)
+
+    return const if const
+  end
+
+  def self.rescued_const_get name
+    const_get(name, true) || Mustache
   end
 
   def self.compiled?
