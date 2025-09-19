@@ -17,10 +17,21 @@ class Mustache
     const = rescued_const_get(name)
 
     return const if const
+
+    const_from_file(name)
   end
 
   def self.rescued_const_get name
     const_get(name, true) || Mustache
+  rescue NameError
+    nil
+  end
+
+  def self.const_from_file name
+    file_name = underscore(name)
+    file_path = "#{view_path}/#{file_name}.rb"
+
+    return Mustache unless File.exist?(file_path)
   end
 
   def self.compiled?

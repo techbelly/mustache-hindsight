@@ -33,4 +33,8 @@ class AutoloadingTest < Minitest::Test
   def test_folder_autoload
     assert_equal TestViews::Namespaced, Mustache.view_class('test_views/namespaced')
   end
+
+  def test_bad_constant_name
+    assert_equal Mustache, Mustache.view_class(404)
+  end
 end
