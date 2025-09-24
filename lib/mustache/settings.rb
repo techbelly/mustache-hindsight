@@ -1,4 +1,14 @@
 class Mustache
+  def initialize_settings
+    @template = nil
+    @template_path = nil
+    @template_extension = nil
+    @template_name = nil
+    @template_file = nil
+    @raise_on_context_miss = nil
+    @context_access_security_level = 2
+  end
+
   def self.initialize_settings
     @template = nil
     @template_path = nil
@@ -54,6 +64,10 @@ class Mustache
   end
 
   def self.template=(template)
+    @template = templateify(template)
+  end
+
+  def template=(template)
     @template = templateify(template)
   end
 

@@ -35,6 +35,15 @@ class MustacheTest < Minitest::Test
     assert klass.compiled?
   end
 
+  def test_knows_when_its_been_compiled_at_the_instance_level
+    klass = Class.new(Mustache)
+    instance = klass.new
+
+    refute instance.compiled?
+    instance.template = 'Hi, {{person}}!'
+    assert instance.compiled?
+  end
+
   def test_inherited_attributes
     Object.const_set :TestNamespace, Module.new
     base = Class.new(Mustache)

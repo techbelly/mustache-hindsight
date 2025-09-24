@@ -1,10 +1,33 @@
 require 'mustache/enumerable'
 require 'mustache/template'
+require 'mustache/context'
 require 'mustache/settings'
 require 'mustache/utils'
 
 class Mustache
+  def initialize(options = {})
+    @options = options
+    
+    initialize_settings
+  end
+
+  def self.partial(name)
+    self.new.partial(name)
+  end
+
+  def partial(name)
+    partialpath = template_path.map{|p| "#{p}/#{name}.#{template_extension}" }.find{|pf| File.readable? pf}
+
+    raise RuntimeError.new("Can't find partial #{name}") if not partialpath and raise_on_context_miss?
+
+    partialpath ? File.read(partialpath) : ""
+  end
+
   
+
+  def compiled?
+    (@template && @template.is_a?(Template)) || self.class.compiled?
+  end
 
   private
 
@@ -50,6 +73,12 @@ class Mustache
 
   def self.templateify(obj, options = {})
     obj.is_a?(Template) ? obj : Template.new(obj, options)
+  end
+
+  def templateify(obj)
+    opts = {:partial_resolver => self.method(:partial)}
+    opts.merge!(@options) if @options.is_a?(Hash)
+    self.class.templateify(obj, opts)
   end
 
   def self.inheritable_config_for(attr_name, default)
