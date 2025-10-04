@@ -1,0 +1,18 @@
+require_relative 'helper'
+
+class TemplateTest < Minitest::Test
+  def test_token
+    assert_equal [:multi, [:static, "foo"]], Mustache::Template.new("foo").tokens
+  end
+
+  def test_token_with_source
+    assert_equal [:multi, [:static, "bar"]], Mustache::Template.new("foo").tokens("bar")
+  end
+end
+
+class TemplateTest2 < Minitest::Test
+  def setup
+    @@template_text ||= File.read(File.dirname(__FILE__) + "/fixtures/simply_complicated.mustache")
+    @template = Mustache::Template.new(@@template_text)
+  end
+end

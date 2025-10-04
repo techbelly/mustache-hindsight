@@ -40,7 +40,58 @@ class Mustache
       @ctag = value
     end
 
+    def compile(template)
+      @encoding = nil
+
+      if template.respond_to?(:encoding)
+        @encoding = template.encoding
+        template = template.dup.force_encoding("BINARY")
+      end
+
+      @sections = []
+      @result = [:multi]
+      @scanner = StringScanner.new(template)
+
+      until @scanner.eos?
+        scan_tags || scan_text
+      end
+
+      unless @sections.empty?
+        type, pos, _ = @sections.pop
+        error "Unclosed section #{type.inspect}", pos
+      end
+
+      @result
+    end
+
     private
+
+    def scan_tags
+      start_of_line = @scanner.beginning_of_line?
+      pre_match_position = @scanner.pos
+      last_index = @result.length
+
+      return unless @scanner.scan @otag_regex
+    end
+
+    def scan_text
+      text = scan_until_exclusive @otag_not_regex
+
+      if text.nil?
+        text = @scanner.rest
+        @scanner.terminate
+      end
+
+      text.force_encoding(@encoding) if @encoding
+
+      @result << [:static, text] unless text.empty?
+    end
+
+    def scan_until_exclusive(regexp)
+      pos = @scanner.pos
+      if @scanner.scan_until(regexp)
+      end
+    end
 
     def regexp(thing)
       Regexp.new Regexp.escape(thing) if thing
