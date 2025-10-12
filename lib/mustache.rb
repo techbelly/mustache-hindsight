@@ -11,6 +11,25 @@ class Mustache
     initialize_settings
   end
 
+  def self.render(*args)
+    new.render(*args)
+  end
+
+  def render(data = template, ctx = {})
+    tpl = case data
+    when Hash
+    when Symbol
+    else
+      templateify(data)
+    end
+
+    return tpl.render(context) if ctx == {}
+  end
+
+  def context
+    @context ||= Context.new(self)
+  end
+
   def self.partial(name)
     self.new.partial(name)
   end

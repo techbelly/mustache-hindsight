@@ -27,6 +27,10 @@ class MustacheTest < Minitest::Test
     assert_equal 'views/stat_stuff', Mustache.underscore('Views::StatStuff')
   end
 
+  def test_render
+    assert_equal 'Hello World!', Mustache.render('Hello World!')
+  end
+
   def test_knows_when_its_been_compiled_when_set_with_string
     klass = Class.new(Mustache)
 

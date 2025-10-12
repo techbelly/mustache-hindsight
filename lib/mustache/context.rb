@@ -2,6 +2,11 @@ require 'mustache/context_miss'
 
 class Mustache
   class Context
+    def initialize(mustache)
+      @stack = [mustache]
+      @partial_template_cache = {}
+    end
+
     def partial(name, indentation = '')
       mustache = mustache_in_stack
 
