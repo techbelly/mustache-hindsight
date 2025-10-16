@@ -2,6 +2,24 @@ require 'strscan'
 
 class Mustache
   class Parser
+    class SyntaxError < StandardError
+      def initialize(message, position)
+        @message = message
+        @lineno, @column, @line, _ = position
+        @stripped_line = @line.strip
+        @stripped_column = @column - (@line.size - @line.lstrip.size)
+      end
+
+      def to_s
+        <<-EOF
+#{@message}
+  Line #{@lineno}
+    #{@stripped_line}
+    #{' ' * @stripped_column}^
+EOF
+      end
+    end
+
     VALID_TYPES = [ '#', '^', '/', '=', '!', '<', '>', '&', '{' ].map(&:freeze)
 
     def self.valid_types
@@ -17,6 +35,10 @@ class Mustache
       types.each { |t| VALID_TYPES << t unless VALID_TYPES.include?(t) }
       @valid_types = nil
     end
+
+    ALLOWED_CONTENT = /(\w|[?!\/.@-])*/
+
+    ANY_CONTENT = [ '!', '=' ].map(&:freeze)
 
     attr_reader :otag, :ctag
 
@@ -66,12 +88,36 @@ class Mustache
 
     private
 
+    def content_tags type, current_ctag_regex
+      if ANY_CONTENT.include?(type)
+        r = /\s*#{regexp(type)}?#{current_ctag_regex}/
+        scan_until_exclusive(r)
+      else
+        @scanner.scan(ALLOWED_CONTENT)
+      end
+    end
+
     def scan_tags
       start_of_line = @scanner.beginning_of_line?
       pre_match_position = @scanner.pos
       last_index = @result.length
 
       return unless @scanner.scan @otag_regex
+      padding = @scanner[1] || ''
+
+      unless start_of_line
+        @result << [:static, padding] unless padding.empty?
+        pre_match_position += padding.length
+        padding = ''
+      end
+
+      current_ctag_regex = @ctag_regex
+      type = @scanner.scan(self.class.valid_types)
+      @scanner.skip(/\s*/)
+
+      content = content_tags(type, current_ctag_regex)
+
+      error "Illegal content in tag" if content.empty?
     end
 
     def scan_text
@@ -93,8 +139,22 @@ class Mustache
       end
     end
 
+    def position
+      rest = @scanner.check_until(/\n|\Z/).to_s.chomp
+
+      parsed = @scanner.string[0...@scanner.pos]
+
+      lines = parsed.split("\n")
+
+      [ lines.size, lines.last.size - 1, lines.last + rest ]
+    end
+
     def regexp(thing)
       Regexp.new Regexp.escape(thing) if thing
+    end
+
+    def error(message, pos = position)
+      raise SyntaxError.new(message, pos)
     end
 
     def scan_tag_comment content, fetch, padding, pre_match_position

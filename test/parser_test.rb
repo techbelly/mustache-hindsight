@@ -14,4 +14,20 @@ class ParserTest < Minitest::Test
     assert_equal [:mustache, :at_sign, 'zomg', 1, 2, 3],
                  parser.send('scan_tag_$', 1, 2, 3)
   end
+
+  def test_illegal_content
+    lexer = Mustache::Parser.new
+    exception = assert_raises Mustache::Parser::SyntaxError do
+      lexer.compile("{{")
+    end
+
+    expected = <<-EOF
+Illegal content in tag
+  Line 1
+    {{
+     ^
+EOF
+
+    assert_equal expected, exception.message
+  end
 end
