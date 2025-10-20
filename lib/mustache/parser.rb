@@ -97,6 +97,10 @@ EOF
       end
     end
 
+    def dispatch_based_on_type type, content, fetch, padding, pre_match_position
+      send("scan_tag_#{type}", content, fetch, padding, pre_match_position)
+    end
+
     def scan_tags
       start_of_line = @scanner.beginning_of_line?
       pre_match_position = @scanner.pos
@@ -118,6 +122,11 @@ EOF
       content = content_tags(type, current_ctag_regex)
 
       error "Illegal content in tag" if content.empty?
+
+      fetch = [:mustache, :fetch, content.split('.')]
+      prev = @result
+
+      dispatch_based_on_type(type, content, fetch, padding, pre_match_position)
     end
 
     def scan_text
@@ -156,6 +165,14 @@ EOF
     def error(message, pos = position)
       raise SyntaxError.new(message, pos)
     end
+
+    def scan_tag_close content, fetch, padding, pre_match_position
+      section, pos, result = @sections.pop
+      if section.nil?
+        error "Closing unopened #{content.inspect}"
+      end
+    end
+    alias_method :'scan_tag_/', :scan_tag_close
 
     def scan_tag_comment content, fetch, padding, pre_match_position
     end

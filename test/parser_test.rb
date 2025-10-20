@@ -15,6 +15,22 @@ class ParserTest < Minitest::Test
                  parser.send('scan_tag_$', 1, 2, 3)
   end
 
+  def test_closing_unopened
+    lexer = Mustache::Parser.new
+    exception = assert_raises Mustache::Parser::SyntaxError do
+      lexer.compile("{{/list}}")
+    end
+
+    expected = <<-EOF
+Closing unopened "list"
+  Line 1
+    {{/list}}
+          ^
+EOF
+
+    assert_equal expected, exception.message
+  end
+
   def test_illegal_content
     lexer = Mustache::Parser.new
     exception = assert_raises Mustache::Parser::SyntaxError do
