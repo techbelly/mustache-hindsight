@@ -31,6 +31,22 @@ EOF
     assert_equal expected, exception.message
   end
 
+  def test_unclosed_tag
+    lexer = Mustache::Parser.new
+    exception = assert_raises Mustache::Parser::SyntaxError do
+      lexer.compile("{{list")
+    end
+
+    expected = <<-EOF
+Unclosed tag
+  Line 1
+    {{list
+         ^
+EOF
+
+    assert_equal expected, exception.message
+  end
+
   def test_illegal_content
     lexer = Mustache::Parser.new
     exception = assert_raises Mustache::Parser::SyntaxError do

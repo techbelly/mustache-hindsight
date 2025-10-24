@@ -101,6 +101,10 @@ EOF
       send("scan_tag_#{type}", content, fetch, padding, pre_match_position)
     end
 
+    def find_closing_tag scanner, current_ctag_regex
+      error "Unclosed tag" unless scanner.scan(current_ctag_regex)
+    end
+
     def scan_tags
       start_of_line = @scanner.beginning_of_line?
       pre_match_position = @scanner.pos
@@ -127,6 +131,13 @@ EOF
       prev = @result
 
       dispatch_based_on_type(type, content, fetch, padding, pre_match_position)
+
+      type = "}" if type == "{"
+
+      @scanner.skip(/\s+/)
+      @scanner.skip(regexp(type)) if type
+
+      find_closing_tag(@scanner, current_ctag_regex)
     end
 
     def scan_text
@@ -148,6 +159,10 @@ EOF
       end
     end
 
+    def offset
+      position[0, 2]
+    end
+
     def position
       rest = @scanner.check_until(/\n|\Z/).to_s.chomp
 
@@ -164,6 +179,10 @@ EOF
 
     def error(message, pos = position)
       raise SyntaxError.new(message, pos)
+    end
+
+    def scan_tag_ content, fetch, padding, pre_match_position
+      @result << [:mustache, :etag, fetch, offset]
     end
 
     def scan_tag_close content, fetch, padding, pre_match_position
