@@ -138,6 +138,10 @@ EOF
       @scanner.skip(regexp(type)) if type
 
       find_closing_tag(@scanner, current_ctag_regex)
+
+      @sections.last[1] << @scanner.pos unless @sections.empty?
+
+      return unless @result == [:multi]
     end
 
     def scan_text
@@ -184,6 +188,14 @@ EOF
     def scan_tag_ content, fetch, padding, pre_match_position
       @result << [:mustache, :etag, fetch, offset]
     end
+
+    def scan_tag_block content, fetch, padding, pre_match_position
+      block = [:multi]
+      @result << [:mustache, :section, fetch, offset, block]
+      @sections << [content, position, @result]
+      @result = block
+    end
+    alias_method :'scan_tag_#', :scan_tag_block
 
     def scan_tag_close content, fetch, padding, pre_match_position
       section, pos, result = @sections.pop
