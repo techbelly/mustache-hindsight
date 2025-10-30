@@ -15,6 +15,22 @@ class ParserTest < Minitest::Test
                  parser.send('scan_tag_$', 1, 2, 3)
   end
 
+  def test_raw_content_and_whitespace
+    lexer = Mustache::Parser.new
+    tokens = lexer.compile("{{#list}}\t{{/list}}")
+
+    expected = [:multi,
+      [:mustache,
+        :section,
+        [:mustache, :fetch, ["list"]],
+        [1, 6],
+        [:multi, [:static, "\t"]],
+        "\t",
+        %w[{{ }}]]]
+
+    assert_equal expected, tokens
+  end
+
   def test_unclosed_section
     lexer = Mustache::Parser.new
     exception = assert_raises Mustache::Parser::SyntaxError do

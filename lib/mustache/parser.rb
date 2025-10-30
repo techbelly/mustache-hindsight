@@ -139,6 +139,10 @@ EOF
 
       find_closing_tag(@scanner, current_ctag_regex)
 
+      if start_of_line && !@scanner.eos?
+        prev.insert(last_index, [:static, padding]) unless padding.empty?
+      end
+
       @sections.last[1] << @scanner.pos unless @sections.empty?
 
       return unless @result == [:multi]
@@ -160,6 +164,8 @@ EOF
     def scan_until_exclusive(regexp)
       pos = @scanner.pos
       if @scanner.scan_until(regexp)
+        @scanner.pos -= @scanner.matched.size
+        @scanner.pre_match[pos..-1]
       end
     end
 
@@ -202,6 +208,9 @@ EOF
       if section.nil?
         error "Closing unopened #{content.inspect}"
       end
+
+      raw = @scanner.pre_match[pos[3]...pre_match_position] + padding
+      (@result = result).last << raw << [self.otag, self.ctag]
     end
     alias_method :'scan_tag_/', :scan_tag_close
 
