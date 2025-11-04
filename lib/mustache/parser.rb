@@ -36,6 +36,8 @@ EOF
       @valid_types = nil
     end
 
+    SKIP_WHITESPACE = [ '#', '^', '/', '<', '>', '=', '!' ].map(&:freeze)
+
     ALLOWED_CONTENT = /(\w|[?!\/.@-])*/
 
     ANY_CONTENT = [ '!', '=' ].map(&:freeze)
@@ -140,7 +142,11 @@ EOF
       find_closing_tag(@scanner, current_ctag_regex)
 
       if start_of_line && !@scanner.eos?
-        prev.insert(last_index, [:static, padding]) unless padding.empty?
+        if @scanner.peek(2) =~ /\r?\n/ && SKIP_WHITESPACE.include?(type)
+          @scanner.skip(/\r?\n/)
+        else
+          prev.insert(last_index, [:static, padding]) unless padding.empty?
+        end
       end
 
       @sections.last[1] << @scanner.pos unless @sections.empty?
