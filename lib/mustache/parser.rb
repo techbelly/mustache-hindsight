@@ -217,6 +217,10 @@ EOF
 
       raw = @scanner.pre_match[pos[3]...pre_match_position] + padding
       (@result = result).last << raw << [self.otag, self.ctag]
+
+      if section != content
+        error "Unclosed section #{section.inspect}", pos
+      end
     end
     alias_method :'scan_tag_/', :scan_tag_close
 

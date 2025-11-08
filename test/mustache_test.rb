@@ -31,6 +31,32 @@ class MustacheTest < Minitest::Test
     assert_equal 'Hello World!', Mustache.render('Hello World!')
   end
 
+  def test_reports_unclosed_sections
+    instance = Mustache.new
+    instance[:list] = [ :item => 1234 ]
+    instance.template = '{{#list}} <li>{{item}}</li> {{/gist}}'
+
+    begin
+      instance.render
+    rescue => e
+    end
+
+    assert e.message.include?('Unclosed section')
+  end
+
+  def test_unclosed_sections_reports_the_line_number
+    instance = Mustache.new
+    instance[:list] = [ :item => 1234 ]
+    instance.template = "hi\nmom\n{{#list}} <li>{{item}}</li> {{/gist}}"
+
+    begin
+      instance.render
+    rescue => e
+    end
+
+    assert e.message.include?('Line 3')
+  end
+
   def test_knows_when_its_been_compiled_when_set_with_string
     klass = Class.new(Mustache)
 

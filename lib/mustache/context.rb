@@ -15,6 +15,16 @@ class Mustache
       template_for_partial(part).render(self)
     end
 
+    def push(new_obj)
+      @stack.unshift(new_obj)
+      @mustache_in_stack = nil
+      self
+    end
+
+    def []=(name, value)
+      push(name => value)
+    end
+
     private
   end
 end

@@ -67,6 +67,10 @@ class Mustache
     @template = templateify(template)
   end
 
+  def template
+    return @template if @template
+  end
+
   def template=(template)
     @template = templateify(template)
   end

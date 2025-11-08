@@ -26,6 +26,10 @@ class Mustache
     return tpl.render(context) if ctx == {}
   end
 
+  def []=(key, value)
+    context[key.to_sym] = value
+  end
+
   def context
     @context ||= Context.new(self)
   end
