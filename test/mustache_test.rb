@@ -74,6 +74,17 @@ class MustacheTest < Minitest::Test
     assert instance.compiled?
   end
 
+  def test_lots_of_staches
+    template = "{{{{foo}}}}"
+
+    begin
+      Mustache.render(template, :foo => "defunkt")
+    rescue => e
+    end
+
+    assert e.message.include?("Illegal content in tag")
+  end
+
   def test_inherited_attributes
     Object.const_set :TestNamespace, Module.new
     base = Class.new(Mustache)

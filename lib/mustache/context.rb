@@ -21,6 +21,12 @@ class Mustache
       self
     end
 
+    def pop
+      @stack.shift
+      @mustache_in_stack = nil
+      self
+    end
+
     def []=(name, value)
       push(name => value)
     end

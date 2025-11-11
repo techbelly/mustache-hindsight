@@ -24,6 +24,13 @@ class Mustache
     end
 
     return tpl.render(context) if ctx == {}
+
+    begin
+      context.push(ctx)
+      tpl.render(context)
+    ensure
+      context.pop
+    end
   end
 
   def []=(key, value)
