@@ -227,5 +227,11 @@ EOF
     def scan_tag_comment content, fetch, padding, pre_match_position
     end
     alias_method :'scan_tag_!', :scan_tag_comment
+
+    def scan_tag_unescaped content, fetch, padding, pre_match_position
+      @result << [:mustache, :utag, fetch, offset]
+    end
+    alias_method :'scan_tag_{', :'scan_tag_unescaped'
+    alias_method :'scan_tag_&', :'scan_tag_unescaped'
   end
 end

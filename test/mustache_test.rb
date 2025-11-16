@@ -2,6 +2,13 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_unescaped_ampersand
+    view = Mustache.new
+    view.template = "<h1>{{& title}}</h1>"
+    view[:title] = "Bear > Shark"
+    assert_equal '<h1>Bear > Shark</h1>', view.render
+  end
+
   def test_classify
     assert_equal 'TemplatePartial', Mustache.classify('template_partial')
     assert_equal 'Admin::TemplatePartial', Mustache.classify('admin/template_partial')

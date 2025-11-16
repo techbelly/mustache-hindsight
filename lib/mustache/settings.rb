@@ -75,6 +75,14 @@ class Mustache
     @template = templateify(template)
   end
 
+  def self.context_access_security_level
+    @context_access_security_level
+  end
+
+  def context_access_security_level
+    self.class.context_access_security_level || @context_access_security_level
+  end
+
   def self.view_namespace
     @view_namespace ||= inheritable_config_for(:view_namespace, Object)
   end
