@@ -19,6 +19,10 @@ class Mustache
       @mustache_in_stack ||= @stack.find { |frame| frame.is_a?(Mustache) }
     end
 
+    def escape(value)
+      mustache_in_stack.escape(value)
+    end
+
     def push(new_obj)
       @stack.unshift(new_obj)
       @mustache_in_stack = nil

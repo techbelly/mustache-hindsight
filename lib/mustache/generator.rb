@@ -32,6 +32,16 @@ class Mustache
       compiled
     end
 
+    def on_etag(name, offset)
+      ev(<<-compiled)
+        v = #{compile!(name)}
+        if v.is_a?(Proc)
+          v = #{@option_static_lambdas ? 'v.call' : 'Mustache::Template.new(v.call.to_s).render(ctx.dup)'}
+        end
+        ctx.escape(v)
+      compiled
+    end
+
     def on_fetch(names)
       return "ctx.current" if names.empty?
 

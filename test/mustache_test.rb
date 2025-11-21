@@ -2,6 +2,14 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_fileless_templates
+    view = Simple.new
+    view.template = 'Hi {{person}}!'
+    view[:person]  = 'mom'
+
+    assert_equal 'Hi mom!', view.render
+  end
+
   def test_unescaped_ampersand
     view = Mustache.new
     view.template = "<h1>{{& title}}</h1>"
@@ -36,6 +44,24 @@ class MustacheTest < Minitest::Test
 
   def test_render
     assert_equal 'Hello World!', Mustache.render('Hello World!')
+  end
+
+  def test_render_with_params
+    assert_equal 'Hello World!', Mustache.render('Hello {{planet}}!', :planet => 'World')
+  end
+
+  def test_render_from_file
+    expected = <<-data
+<VirtualHost *>
+  ServerName example.com
+  DocumentRoot /var/www/example.com
+  RailsEnv production
+</VirtualHost>
+data
+    template = File.read(File.dirname(__FILE__) + "/fixtures/passenger.conf")
+    assert_equal expected, Mustache.render(template, :stage => 'production',
+                                                     :server => 'example.com',
+                                                     :deploy_to => '/var/www/example.com' )
   end
 
   def test_reports_unclosed_sections
@@ -92,6 +118,28 @@ class MustacheTest < Minitest::Test
     assert e.message.include?("Illegal content in tag")
   end
 
+  def test_custom_html_escaping
+    view = Class.new(Mustache) do
+      def escapeHTML(str)
+        "pong"
+      end
+    end
+
+    assert_equal 'pong', view.render("{{thing}}", :thing => "nothing")
+    assert_equal 'nothing', Mustache.render("{{thing}}", :thing => "nothing")
+  end
+
+  def test_custom_escaping
+    view = Class.new(Mustache) do
+      def escape(str)
+        JSON.dump(str)
+      end
+    end
+
+    assert_equal '{ "key": "a\"b" }', view.render('{ "key": {{thing}} }', :thing => 'a"b')
+    assert_equal 'nothing', Mustache.render("{{thing}}", :thing => "nothing")
+  end
+
   def test_inherited_attributes
     Object.const_set :TestNamespace, Module.new
     base = Class.new(Mustache)
@@ -108,5 +156,18 @@ class MustacheTest < Minitest::Test
     value = File.expand_path('./foo')
     base.send("#{attr}=", value)
     assert_equal value, tmpl.send(attr).first
+  end
+
+  def test_cast_to_hash_in_context
+    hashlike = Object.new
+    def hashlike.title
+    end
+    def hashlike.to_hash
+      { title: 'title' }
+    end
+
+    template = '%%{{title}}%%'
+
+    assert_equal '%%title%%', Mustache.render(template, hashlike)
   end
 end

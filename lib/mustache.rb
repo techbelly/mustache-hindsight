@@ -53,7 +53,13 @@ class Mustache
     partialpath ? File.read(partialpath) : ""
   end
 
+  def escape(value)
+    self.escapeHTML(value.to_s)
+  end
   
+  def escapeHTML(str)
+    CGI.escapeHTML(str)
+  end
 
   def compiled?
     (@template && @template.is_a?(Template)) || self.class.compiled?
