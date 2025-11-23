@@ -118,6 +118,17 @@ data
     assert e.message.include?("Illegal content in tag")
   end
 
+  def test_liberal_tag_names
+    template = "{{first-name}} {{middle_name!}} {{lastName?}}"
+    hash = {
+      'first-name' => 'chris',
+      'middle_name!' => 'j',
+      'lastName?' => 'strath'
+    }
+
+    assert_equal "chris j strath", Mustache.render(template, hash)
+  end
+
   def test_custom_html_escaping
     view = Class.new(Mustache) do
       def escapeHTML(str)
