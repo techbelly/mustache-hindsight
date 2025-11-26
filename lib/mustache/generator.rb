@@ -48,9 +48,15 @@ class Mustache
       names = names.map { |n| n.to_sym }
 
       initial, *rest = names
-      <<-compiled
-        ctx[#{initial.inspect}]
-      compiled
+      if rest.any?
+        <<-compiled
+          #{rest.inspect}.reduce(ctx[#{initial.inspect}]) { |value, key| value && ctx.find(value, key) }
+        compiled
+      else
+        <<-compiled
+          ctx[#{initial.inspect}]
+        compiled
+      end
     end
 
     def ev(s)

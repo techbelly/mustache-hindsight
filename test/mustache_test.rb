@@ -169,6 +169,23 @@ data
     assert_equal value, tmpl.send(attr).first
   end
 
+  def test_hash_default_proc
+    template = <<template
+{{greetings.Peter}}
+{{greetings.Paul}}
+{{greetings.Mary}}
+template
+    data = {
+      'greetings' => Hash.new { |hash, key| hash[key] = "Hello, #{key}!" }
+    }
+
+    assert_equal <<expected, Mustache.render(template, data)
+Hello, Peter!
+Hello, Paul!
+Hello, Mary!
+expected
+  end
+
   def test_cast_to_hash_in_context
     hashlike = Object.new
     def hashlike.title
