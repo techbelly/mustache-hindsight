@@ -2,6 +2,55 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_single_line_sections
+    html = %(<p class="flash-notice" {{# no_flash }}style="display: none;"{{/ no_flash }}>)
+
+    instance = Mustache.new
+    instance.template = html
+    instance[:no_flash] = true
+    assert_equal %Q'<p class="flash-notice" style="display: none;">', instance.render
+  end
+
+  def test_sassy_single_line_sections
+    instance = Mustache.new
+    instance[:full_time] = true
+    instance.template = "\n {{#full_time}}full time{{/full_time}}\n"
+
+    assert_equal "\n full time\n", instance.render
+  end
+
+  def test_sassier_single_line_sections
+    instance = Mustache.new
+    instance.template = "\t{{#list}}\r\n\t{{/list}}"
+
+    assert_equal "", instance.render
+  end
+
+  def test_two_line_sections
+    html = %(<p class="flash-notice" {{# no_flash }}style="display: none;"\n{{/ no_flash }}>)
+
+    instance = Mustache.new
+    instance.template = html
+    instance[:no_flash] = true
+    assert_equal %Q'<p class="flash-notice" style="display: none;"\n>', instance.render
+  end
+
+  def test_multi_line_sections_preserve_trailing_newline
+    view = Mustache.new
+    view.template = <<template
+{{#something}}
+yay
+{{/something}}
+Howday.
+template
+
+    view[:something] = true
+    assert_equal <<-rendered, view.render
+yay
+Howday.
+rendered
+  end
+
   def test_fileless_templates
     view = Simple.new
     view.template = 'Hi {{person}}!'
@@ -64,6 +113,18 @@ data
                                                      :deploy_to => '/var/www/example.com' )
   end
 
+  def test_doesnt_execute_what_it_doesnt_need_to
+    instance = Mustache.new
+    instance[:show] = false
+    instance.instance_eval do
+      def die
+      end
+    end
+    instance.template = '{{#show}} <li>{{die}}</li> {{/show}} yay'
+
+    assert_equal " yay", instance.render
+  end
+
   def test_reports_unclosed_sections
     instance = Mustache.new
     instance[:list] = [ :item => 1234 ]
@@ -88,6 +149,37 @@ data
     end
 
     assert e.message.include?('Line 3')
+  end
+
+  def test_enumerable_sections_accept_a_hash_as_a_context
+    instance = Mustache.new
+    instance[:list] = { :item => 1234 }
+    instance.template = '{{#list}} <li>{{item}}</li> {{/list}}'
+
+    assert_equal ' <li>1234</li> ', instance.render
+  end
+
+  def test_enumerable_sections_accept_a_string_keyed_hash_as_a_context
+    instance = Mustache.new
+    instance[:list] = { 'item' => 1234 }
+    instance.template = '{{#list}} <li>{{item}}</li> {{/list}}'
+
+    assert_equal ' <li>1234</li> ', instance.render
+  end
+
+  def test_not_found_in_context_renders_empty_string
+    instance = Mustache.new
+    instance.template = '{{#list}} <li>{{item}}</li> {{/list}}'
+
+    assert_equal '', instance.render
+  end
+
+  def test_not_found_in_nested_context_renders_empty_string
+    instance = Mustache.new
+    instance[:list] = { :item => 1234 }
+    instance.template = '{{#list}} <li>{{prefix}}{{item}}</li> {{/list}}'
+
+    assert_equal ' <li>1234</li> ', instance.render
   end
 
   def test_knows_when_its_been_compiled_when_set_with_string
@@ -145,6 +237,59 @@ data
     }
 
     assert_equal "chris j strath", Mustache.render(template, hash)
+  end
+
+  def test_nested_sections_same_names
+    template = <<template
+{{#items}}
+start
+{{#items}}
+{{a}}
+{{/items}}
+end
+{{/items}}
+template
+
+    data = {
+      "items" => [
+        { "items" => [ {"a" => 1}, {"a" => 2}, {"a" => 3} ] },
+        { "items" => [ {"a" => 4}, {"a" => 5}, {"a" => 6} ] },
+        { "items" => [ {"a" => 7}, {"a" => 8}, {"a" => 9} ] }
+      ]
+    }
+
+    assert_equal <<expected, Mustache.render(template, data)
+start
+1
+2
+3
+end
+start
+4
+5
+6
+end
+start
+7
+8
+9
+end
+expected
+  end
+
+  def test_id_with_nested_context
+    html = %(<div>{{id}}</div>\n<div>{{# has_a? }}{{id}}{{/ has_a? }}</div>\n<div>{{# has_b? }}{{id}}{{/ has_b? }}</div>\n)
+
+    instance = Mustache.new
+    instance.template = html
+    instance[:id] = 3
+    instance[:has_a?] = true
+    instance[:has_b?] = true
+    assert_equal <<-rendered, instance.render
+<div>3</div>
+<div>3</div>
+<div>3</div>
+rendered
   end
 
   def test_indentation
@@ -219,6 +364,30 @@ Hello, Peter!
 Hello, Paul!
 Hello, Mary!
 expected
+  end
+
+  def test_indentation_again
+    template = <<template
+SELECT
+  {{#cols}}
+    {{name}},
+  {{/cols}}
+FROM
+  DUMMY1
+template
+
+    view = Mustache.new
+    view[:cols] = [{:name => 'Name'}, {:name => 'Age'}, {:name => 'Weight'}]
+    view.template = template
+
+    assert_equal <<template, view.render
+SELECT
+    Name,
+    Age,
+    Weight,
+FROM
+  DUMMY1
+template
   end
 
   def test_cast_to_hash_in_context

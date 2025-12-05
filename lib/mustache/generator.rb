@@ -22,6 +22,37 @@ class Mustache
       end
     end
 
+    def on_section(name, offset, content, raw, delims)
+      code = compile(content)
+
+      proc_handling = if @option_static_lambdas
+      else
+        <<-compiled
+          t = Mustache::Template.new(v.call(#{raw.inspect}).to_s)
+          def t.tokens(src=@source)
+            p = Mustache::Parser.new
+            p.otag, p.ctag = #{delims.inspect}
+            p.compile(src)
+          end
+          t.render(ctx.dup)
+        compiled
+      end
+
+      ev(<<-compiled)
+      case v = #{compile!(name)}
+      when NilClass, FalseClass
+      when TrueClass
+        #{code}
+      when Proc
+        #{proc_handling}
+      when Array, Enumerator, Mustache::Enumerable
+        v.map { |_| ctx.push(_); r = #{code}; ctx.pop; r }.join
+      else
+        ctx.push(v); r = #{code}; ctx.pop; r
+      end
+      compiled
+    end
+
     def on_utag(name, offset)
       ev(<<-compiled)
         v = #{compile!(name)}
