@@ -182,6 +182,16 @@ data
     assert_equal ' <li>1234</li> ', instance.render
   end
 
+  def test_found_in_nested_context_when_asked_to_raise
+    instance = Mustache.new
+    instance.raise_on_context_miss = true
+
+    instance[:item] = { :list => [ { :value => 1235, :deep_list => [{:x => 'y'}]}] }
+
+    instance.template = '{{#item.list}}{{#deep_list}}{{value}}{{/deep_list}}{{/item.list}}'
+    assert_equal '1235', instance.render
+  end
+
   def test_knows_when_its_been_compiled_when_set_with_string
     klass = Class.new(Mustache)
 

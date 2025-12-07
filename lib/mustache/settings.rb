@@ -75,6 +75,10 @@ class Mustache
     @template = templateify(template)
   end
 
+  def raise_on_context_miss=(boolean)
+    @raise_on_context_miss = boolean
+  end
+
   def self.context_access_security_level
     @context_access_security_level
   end
