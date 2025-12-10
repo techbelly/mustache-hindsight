@@ -59,6 +59,10 @@ class Mustache
       return find_in_hash(obj.to_hash, key, default) if obj.respond_to?(:to_hash)
     end
 
+    def current
+      @stack.first
+    end
+
     private
 
     def find_in_hash(obj, key, default)
