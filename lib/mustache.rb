@@ -16,8 +16,14 @@ class Mustache
   end
 
   def render(data = template, ctx = {})
+    case data
+    when Hash
+      ctx = data
+    end
+
     tpl = case data
     when Hash
+      templateify(template)
     when Symbol
     else
       templateify(data)
