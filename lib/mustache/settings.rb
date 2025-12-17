@@ -75,6 +75,14 @@ class Mustache
     @template = templateify(template)
   end
 
+  def self.raise_on_context_miss?
+    @raise_on_context_miss
+  end
+
+  def raise_on_context_miss?
+    self.class.raise_on_context_miss? || @raise_on_context_miss
+  end
+
   def raise_on_context_miss=(boolean)
     @raise_on_context_miss = boolean
   end

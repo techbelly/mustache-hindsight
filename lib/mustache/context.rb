@@ -70,7 +70,11 @@ class Mustache
       return obj[key.to_s] if obj.has_key?(key.to_s)
       return obj[key]      if obj.respond_to?(:default_proc) && obj.default_proc && obj[key]
 
-      obj.fetch(key, default)
+      if :__missing != default && mustache_in_stack.raise_on_context_miss?
+        raise ContextMiss.new("Can't find #{key} in #{obj}")
+      else
+        obj.fetch(key, default)
+      end
     end
   end
 end
