@@ -11,6 +11,15 @@ class MustacheTest < Minitest::Test
     assert_equal %Q'<p class="flash-notice" style="display: none;">', instance.render
   end
 
+  def test_strings_as_sections_do_not_enumerate
+    instance = Mustache.new
+    instance[:contact] = "Call 1-888-FLOWERS\nAsk for Johnson."
+    instance.template = "{{#contact}}<div id='contact'>{{contact}}</div>{{/contact}}"
+
+    assert_equal "<div id='contact'>Call 1-888-FLOWERS\nAsk for Johnson.</div>",
+                 instance.render
+  end
+
   def test_sassy_single_line_sections
     instance = Mustache.new
     instance[:full_time] = true

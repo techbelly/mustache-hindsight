@@ -50,6 +50,8 @@ class Mustache
         value = find(frame, name, :__missing)
         return value if :__missing != value
       end
+
+      default
     end
 
     def find(obj, key, default = nil)
@@ -57,6 +59,14 @@ class Mustache
       end
 
       return find_in_hash(obj.to_hash, key, default) if obj.respond_to?(:to_hash)
+
+      if mustache_in_stack.context_access_security_level >= 4
+      end
+
+      unless obj.respond_to?(key)
+        key = key.to_s.tr('-', '_')
+        return default unless obj.respond_to?(key)
+      end
     end
 
     def current
