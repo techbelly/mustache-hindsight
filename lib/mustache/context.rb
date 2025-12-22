@@ -51,7 +51,11 @@ class Mustache
         return value if :__missing != value
       end
 
-      default
+      if default == :__raise || mustache_in_stack.raise_on_context_miss?
+        raise ContextMiss.new("Can't find #{name} in #{@stack.inspect}")
+      else
+        default
+      end
     end
 
     def find(obj, key, default = nil)

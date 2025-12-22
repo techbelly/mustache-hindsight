@@ -205,6 +205,16 @@ data
     assert_equal ' <li>1234</li> ', instance.render
   end
 
+  def test_not_found_in_context_raises_when_asked_to
+    instance = Mustache.new
+    instance.raise_on_context_miss = true
+    instance.template = '{{#list}} <li>{{item}}</li> {{/list}}'
+
+    assert_raises Mustache::ContextMiss do
+      instance.render
+    end
+  end
+
   def test_not_found_deep_in_context_raises_when_asked_to
     instance = Mustache.new
     instance.raise_on_context_miss = true
