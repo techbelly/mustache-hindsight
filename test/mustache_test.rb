@@ -82,6 +82,12 @@ rendered
     assert_equal 'Hi mom!', view.render
   end
 
+  def test_multi_linecomments
+    view = Comments.new
+    view.template = "<h1>{{title}}{{! just something interesting... \n#or not... }}</h1>\n"
+    assert_equal "<h1>A Comedy of Errors</h1>\n", view.render
+  end
+
   def test_unescaped_ampersand
     view = Mustache.new
     view.template = "<h1>{{& title}}</h1>"
@@ -190,6 +196,63 @@ data
     assert_equal ' <li>1234</li> ', instance.render
   end
 
+  def test_enumerable_sections_enumerate_mustache_enumerables
+    person = Struct.new(:name, :age)
+    people_array = []
+    people_array << person.new('Juliet', 13)
+    people_array << person.new('Romeo', 16)
+    people = Class.new do
+      include Enumerable
+      include Mustache::Enumerable
+
+      def initialize array
+        @people = array
+      end
+
+      def each *args, &block
+        @people.each(*args, &block)
+      end
+    end
+
+    view = Mustache.new
+    view[:people] = people.new(people_array)
+    view.template = <<-TEMPLATE
+{{#people}}
+{{name}} is {{age}}
+{{/people}}
+    TEMPLATE
+    assert_equal <<-EXPECTED, view.render
+Juliet is 13
+Romeo is 16
+    EXPECTED
+  end
+
+  def test_enumerable_sections_do_not_enumerate_untagged_enumerables
+    people = Struct.new(:first, :second, :third)
+    person = Struct.new(:name, :age)
+
+    view = Mustache.new
+    view[:people] = people.new(person.new("Mercutio", 17), person.new("Tybalt", 20), person.new("Benvolio", 15))
+    view.template = <<-TEMPLATE
+{{#people}}
+{{#first}}
+{{name}} is {{age}}
+{{/first}}
+{{#second}}
+{{name}} is {{age}}
+{{/second}}
+{{#third}}
+{{name}} is {{age}}
+{{/third}}
+{{/people}}
+    TEMPLATE
+    assert_equal <<-EXPECTED, view.render
+Mercutio is 17
+Tybalt is 20
+Benvolio is 15
+    EXPECTED
+  end
+
   def test_not_found_in_context_renders_empty_string
     instance = Mustache.new
     instance.template = '{{#list}} <li>{{item}}</li> {{/list}}'
@@ -271,6 +334,17 @@ data
     view[:dynamic_name] = 'Chris'
 
     assert_equal "{{dynamic_name}}", view.render.chomp
+  end
+
+  def test_sections_which_refer_to_unary_method_call_them_as_proc
+    kls = Class.new(Mustache) do
+      def unary_method(arg)
+        "(#{arg})"
+      end
+    end
+
+    str = kls.render("{{#unary_method}}test{{/unary_method}}")
+    assert_equal "(test)", str
   end
 
   def test_lots_of_staches
@@ -365,6 +439,14 @@ end
 template
   end
 
+  def test_struct
+    person = Struct.new(:name, :age)
+    view = Mustache.new
+    view[:person] = person.new('Marvin', 25)
+    view.template = '{{#person}}{{name}} is {{age}}{{/person}}'
+    assert_equal 'Marvin is 25', view.render
+  end
+
   def test_custom_html_escaping
     view = Class.new(Mustache) do
       def escapeHTML(str)
@@ -443,6 +525,44 @@ template
 Hello, Peter!
 Hello, Paul!
 Hello, Mary!
+expected
+  end
+
+  def test_array_of_arrays
+    template = <<template
+{{#items}}
+start
+{{#map}}
+{{a}}
+{{/map}}
+end
+{{/items}}
+template
+
+    data = {
+      "items" => [
+        [ {"a" => 1}, {"a" => 2}, {"a" => 3} ],
+        [ {"a" => 4}, {"a" => 5}, {"a" => 6} ],
+        [ {"a" => 7}, {"a" => 8}, {"a" => 9} ]
+      ]
+    }
+
+    assert_equal <<expected, Mustache.render(template, data)
+start
+1
+2
+3
+end
+start
+4
+5
+6
+end
+start
+7
+8
+9
+end
 expected
   end
 

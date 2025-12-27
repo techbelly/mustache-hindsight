@@ -71,6 +71,15 @@ class Mustache
         key = key.to_s.tr('-', '_')
         return default unless obj.respond_to?(key)
       end
+
+      if mustache_in_stack.context_access_security_level >= 3 && !obj.class.instance_methods(false).include?(key.to_sym)
+      end
+
+      if mustache_in_stack.context_access_security_level >= 2 && MethodBlacklist.include?(key.to_s)
+      end
+
+      meth = obj.method(key) rescue proc { obj.send(key) }
+      meth.arity == 1 ? meth.to_proc : meth.call
     end
 
     def current
