@@ -63,12 +63,18 @@ class Mustache
     @template_extension ||= self.class.template_extension
   end
 
+  def self.template
+    @template ||= templateify(File.read(template_file))
+  end
+
   def self.template=(template)
     @template = templateify(template)
   end
 
   def template
     return @template if @template
+
+    @template = self.class.template
   end
 
   def template=(template)

@@ -447,6 +447,10 @@ template
     assert_equal 'Marvin is 25', view.render
   end
 
+  def test_method_missing
+    assert_equal('[ 0 1 2 3 4 5 6 7 8 9 10 ]', MethodMissing.render)
+  end
+
   def test_custom_html_escaping
     view = Class.new(Mustache) do
       def escapeHTML(str)
@@ -601,6 +605,19 @@ template
     template = '%%{{title}}%%'
 
     assert_equal '%%title%%', Mustache.render(template, hashlike)
+  end
+
+  def test_instance_with_initialize_render
+    klass = Class.new(Mustache) do
+      def initialize(name)
+        super
+        @name = name
+      end
+      attr_reader :name
+    end
+
+    klass.template = "Hi {{name}}!"
+    assert_equal "Hi Dougal!", klass.new("Dougal").render
   end
 
   def test_variable_with_at_name
