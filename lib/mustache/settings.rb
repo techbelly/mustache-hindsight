@@ -63,6 +63,15 @@ class Mustache
     @template_extension ||= self.class.template_extension
   end
 
+  def self.template_file
+    @template_file || path.map{|p| "#{p}/#{template_name}.#{template_extension}" }.find{|tf| File.readable? tf}
+  end
+
+  def self.template_file=(tf)
+    @template_file = tf
+    @template = nil
+  end
+
   def self.template
     @template ||= templateify(File.read(template_file))
   end

@@ -309,6 +309,15 @@ Benvolio is 15
     assert klass.compiled?
   end
 
+  def test_knows_when_its_been_compiled_when_using_a_file_template
+    klass = Class.new(Simple)
+    klass.template_file = File.dirname(__FILE__) + '/fixtures/simple.mustache'
+
+    refute klass.compiled?
+    klass.render
+    assert klass.compiled?
+  end
+
   def test_knows_when_its_been_compiled_at_the_instance_level
     klass = Class.new(Mustache)
     instance = klass.new
