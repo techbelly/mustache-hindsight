@@ -30,6 +30,15 @@ class AutoloadingTest < Minitest::Test
     assert_equal Mustache, klass
   end
 
+  def test_namespaced_autoload
+    Mustache.view_namespace = TestViews
+    klass = Mustache.view_class('Namespaced')
+    assert_equal TestViews::Namespaced, klass
+    assert_equal <<-end_render.strip, klass.render
+<h1>Dragon &lt; Tiger</h1>
+end_render
+  end
+
   def test_folder_autoload
     assert_equal TestViews::Namespaced, Mustache.view_class('test_views/namespaced')
   end

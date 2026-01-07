@@ -2,6 +2,27 @@ require_relative 'helper'
 require 'json'
 
 class MustacheTest < Minitest::Test
+  def test_instance_render
+    klass = Class.new(Mustache)
+    klass.template = "Hi {{thing}}!"
+    assert_equal "Hi world!", klass.render(:thing => :world)
+    assert_equal "Nice.", klass.render("{{compliment}}.", :compliment => "Nice")
+    assert_equal <<-end_simple, Simple.new.render(:name => "yo", :in_ca => false)
+Hello yo
+You have just won $10000!
+end_simple
+  end
+
+  def test_passenger
+    assert_equal <<-end_passenger, Passenger.render
+<VirtualHost *>
+  ServerName example.com
+  DocumentRoot /var/www/example.com
+  RailsEnv production
+</VirtualHost>
+end_passenger
+  end
+
   def test_single_line_sections
     html = %(<p class="flash-notice" {{# no_flash }}style="display: none;"{{/ no_flash }}>)
 
@@ -74,6 +95,44 @@ Howday.
 rendered
   end
 
+  def test_simple
+    assert_equal <<-end_simple, Simple.render
+Hello Chris
+You have just won $10000!
+Well, $6000.0, after taxes.
+end_simple
+  end
+
+  def test_hash_assignment
+    view = Simple.new
+    view[:name]  = 'Bob'
+    view[:value] = '4000'
+    view[:in_ca] = false
+
+    assert_equal <<-end_simple, view.render
+Hello Bob
+You have just won $4000!
+end_simple
+  end
+
+  def test_crazier_hash_assignment
+    view = Simple.new
+    view[:name]  = 'Crazy'
+    view[:in_ca] = [
+      { :taxed_value => 1 },
+      { :taxed_value => 2 },
+      { :taxed_value => 3 },
+    ]
+
+    assert_equal <<-end_simple, view.render
+Hello Crazy
+You have just won $10000!
+Well, $1, after taxes.
+Well, $2, after taxes.
+Well, $3, after taxes.
+end_simple
+  end
+
   def test_fileless_templates
     view = Simple.new
     view.template = 'Hi {{person}}!'
@@ -82,10 +141,30 @@ rendered
     assert_equal 'Hi mom!', view.render
   end
 
+  def test_double_section
+    assert_equal <<-end_section, DoubleSection.render
+  * first
+* second
+  * third
+end_section
+  end
+
+  def test_comments
+    assert_equal "<h1>A Comedy of Errors</h1>\n", Comments.render
+  end
+
   def test_multi_linecomments
     view = Comments.new
     view.template = "<h1>{{title}}{{! just something interesting... \n#or not... }}</h1>\n"
     assert_equal "<h1>A Comedy of Errors</h1>\n", view.render
+  end
+
+  def test_escaped
+    assert_equal '<h1>Bear &gt; Shark</h1>', Escaped.render
+  end
+
+  def test_unescaped
+    assert_equal '<h1>Bear > Shark</h1>', Unescaped.render
   end
 
   def test_unescaped_ampersand
@@ -318,6 +397,19 @@ Benvolio is 15
     assert klass.compiled?
   end
 
+  def test_an_instance_knows_when_its_class_is_compiled
+    klass = Class.new(Simple)
+    instance = klass.new
+
+    refute klass.compiled?, "Simple was already compiled (from class)."
+    refute instance.compiled?, "Simple was already compiled (from instance)."
+
+    klass.render
+
+    assert klass.compiled?, "Simple was not compiled (from class)."
+    assert instance.compiled?, "Simple was not compiled (from instance)."
+  end
+
   def test_knows_when_its_been_compiled_at_the_instance_level
     klass = Class.new(Mustache)
     instance = klass.new
@@ -376,6 +468,12 @@ Benvolio is 15
     }
 
     assert_equal "chris j strath", Mustache.render(template, hash)
+  end
+
+  def test_liberal_tag_names_in_class
+    assert_equal <<-end_liberal, Liberal.render
+kevin j sheurs 123 Somewhere St
+end_liberal
   end
 
   def test_nested_sections_same_names
