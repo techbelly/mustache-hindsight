@@ -141,6 +141,15 @@ end_simple
     assert_equal 'Hi mom!', view.render
   end
 
+  def test_delimiters
+    assert_equal <<-end_template, Delimiters.render
+* It worked the first time.
+* And it worked the second time.
+* As well as the third.
+* Then, surprisingly, it worked the final time.
+end_template
+  end
+
   def test_double_section
     assert_equal <<-end_section, DoubleSection.render
   * first
@@ -417,6 +426,20 @@ Benvolio is 15
     refute instance.compiled?
     instance.template = 'Hi, {{person}}!'
     assert instance.compiled?
+  end
+
+  def test_sections_returning_lambdas_get_called_with_text
+    view = Lambda.new
+    view[:name] = 'Chris'
+
+    assert_equal "Hi Chris.\n\nHi {{name}}.", view.render.chomp
+    assert_equal 1, view.calls
+
+    assert_equal "Hi Chris.\n\nHi {{name}}.", view.render.chomp
+    assert_equal 1, view.calls
+
+    assert_equal "Hi Chris.\n\nHi {{name}}.", view.render.chomp
+    assert_equal 1, view.calls
   end
 
   def test_sections_returning_lambdas_get_called_dynamically_with_text

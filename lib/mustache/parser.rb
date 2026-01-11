@@ -228,6 +228,11 @@ EOF
     end
     alias_method :'scan_tag_!', :scan_tag_comment
 
+    def scan_tag_delimiter content, fetch, padding, pre_match_position
+      self.otag, self.ctag = content.split(' ', 2)
+    end
+    alias_method :'scan_tag_=', :scan_tag_delimiter
+
     def scan_tag_unescaped content, fetch, padding, pre_match_position
       @result << [:mustache, :utag, fetch, offset]
     end
