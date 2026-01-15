@@ -233,6 +233,15 @@ EOF
     end
     alias_method :'scan_tag_=', :scan_tag_delimiter
 
+    def scan_tag_open_partial content, fetch, padding, pre_match_position
+      @result << if @option_inline_partials_at_compile_time
+      else
+        [:mustache, :partial, content, offset, padding]
+      end
+    end
+    alias_method :'scan_tag_<', :scan_tag_open_partial
+    alias_method :'scan_tag_>', :scan_tag_open_partial
+
     def scan_tag_unescaped content, fetch, padding, pre_match_position
       @result << [:mustache, :utag, fetch, offset]
     end

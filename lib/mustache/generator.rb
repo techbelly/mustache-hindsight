@@ -53,6 +53,10 @@ class Mustache
       compiled
     end
 
+    def on_partial(name, offset, indentation)
+      ev("ctx.partial(#{name.to_sym.inspect}, #{indentation.inspect})")
+    end
+
     def on_utag(name, offset)
       ev(<<-compiled)
         v = #{compile!(name)}
