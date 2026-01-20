@@ -43,6 +43,15 @@ end_render
     assert_equal TestViews::Namespaced, Mustache.view_class('test_views/namespaced')
   end
 
+  def test_namespaced_partial_autoload
+    Mustache.view_namespace = TestViews
+    klass = Mustache.view_class(:namespaced_with_partial)
+    assert_equal TestViews::NamespacedWithPartial, klass
+    assert_equal <<-end_render.strip, klass.render
+My opinion: Again, Victory!
+end_render
+  end
+
   def test_bad_constant_name
     assert_equal Mustache, Mustache.view_class(404)
   end

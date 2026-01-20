@@ -15,6 +15,10 @@ class Mustache
       template_for_partial(part).render(self)
     end
 
+    def template_for_partial(partial)
+      @partial_template_cache[partial] ||= Template.new(partial)
+    end
+
     def mustache_in_stack
       @mustache_in_stack ||= @stack.find { |frame| frame.is_a?(Mustache) }
     end
