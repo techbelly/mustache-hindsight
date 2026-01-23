@@ -20,6 +20,28 @@ end_partial
     assert_equal "Again, success!", view.render
   end
 
+  def test_view_partial_inherits_context
+    klass = Class.new(TemplatePartial)
+    view = klass.new
+    view.template_path = File.dirname(__FILE__) + '/fixtures'
+    view[:titles] = [{:title => :One}, {:title => :Two}]
+    view.template = <<-end_template
+<h1>Context Test</h1>
+<ul>
+{{#titles}}
+<li>{{>inner_partial}}</li>
+{{/titles}}
+</ul>
+end_template
+    assert_equal <<-end_partial, view.render
+<h1>Context Test</h1>
+<ul>
+<li>Again, One!</li>
+<li>Again, Two!</li>
+</ul>
+end_partial
+  end
+
   def test_view_partial_inherits_context_of_class_methods
     klass = Class.new(TemplatePartial)
     klass.template_path = File.dirname(__FILE__) + '/fixtures'

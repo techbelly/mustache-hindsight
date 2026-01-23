@@ -45,6 +45,11 @@ class Mustache
 
   alias_method :path, :template_path
 
+  def template_path=(path)
+    @template_path = self.class.setup_path(path)
+    @template = nil
+  end
+
   class << self
     alias_method :path, :template_path
     alias_method :path=, :template_path=
