@@ -41,6 +41,14 @@ end_passenger
                  instance.render
   end
 
+  def test_empty_string_as_section_does_not_render_inverted
+    instance = Mustache.new
+    instance[:value] = ""
+    instance.template = "{{#value}}Value Found{{/value}}{{^value}}Value Not Found{{/value}}"
+
+    assert_equal "Value Found", instance.render
+  end
+
   def test_sassy_single_line_sections
     instance = Mustache.new
     instance[:full_time] = true
@@ -93,6 +101,14 @@ template
 yay
 Howday.
 rendered
+  end
+
+  def test_single_line_inverted_sections
+    html = %(<p class="flash-notice" {{^ flash }}style="display: none;"{{/ flash }}>)
+
+    instance = Mustache.new
+    instance.template = html
+    assert_equal %Q'<p class="flash-notice" style="display: none;">', instance.render
   end
 
   def test_simple
@@ -152,6 +168,14 @@ end_template
 
   def test_double_section
     assert_equal <<-end_section, DoubleSection.render
+  * first
+* second
+  * third
+end_section
+  end
+
+  def test_inverted_section
+    assert_equal <<-end_section, InvertedSection.render
   * first
 * second
   * third
@@ -638,6 +662,21 @@ text
 * Chris
 * Mark
 * Scott
+text
+  end
+
+  def test_dot_notation
+    assert_equal <<-text, DotNotation.render
+* Chris Firescythe
+* 24
+* Cincinnati, OH
+* Cincinnati, OH
+* Cincinnati, OH
+* Cincinnati, OH
+* Normal
+
+* Chris Firescythe
+* Cincinnati, OH
 text
   end
 

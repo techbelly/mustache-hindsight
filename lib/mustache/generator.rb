@@ -53,6 +53,17 @@ class Mustache
       compiled
     end
 
+    def on_inverted_section(name, offset, content, raw, delims)
+      code = compile(content)
+
+      ev(<<-compiled)
+      v = #{compile!(name)}
+      if v.nil? || v == false || (v.class != String && v.respond_to?(:empty?) && v.empty?)
+        #{code}
+      end
+      compiled
+    end
+
     def on_partial(name, offset, indentation)
       ev("ctx.partial(#{name.to_sym.inspect}, #{indentation.inspect})")
     end

@@ -209,6 +209,14 @@ EOF
     end
     alias_method :'scan_tag_#', :scan_tag_block
 
+    def scan_tag_inverted content, fetch, padding, pre_match_position
+      block = [:multi]
+      @result << [:mustache, :inverted_section, fetch, offset, block]
+      @sections << [content, position, @result]
+      @result = block
+    end
+    alias_method :'scan_tag_^', :scan_tag_inverted
+
     def scan_tag_close content, fetch, padding, pre_match_position
       section, pos, result = @sections.pop
       if section.nil?
