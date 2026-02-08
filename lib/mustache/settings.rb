@@ -77,6 +77,15 @@ class Mustache
     @template = nil
   end
 
+  def template_name
+    @template_name ||= self.class.template_name
+  end
+
+  def template_name=(template_name)
+    @template_name = template_name
+    @template = nil
+  end
+
   def self.template_file
     @template_file || path.map{|p| "#{p}/#{template_name}.#{template_extension}" }.find{|tf| File.readable? tf}
   end
@@ -84,6 +93,10 @@ class Mustache
   def self.template_file=(tf)
     @template_file = tf
     @template = nil
+  end
+
+  def template_file
+    @template_file || path.map{|p| "#{p}/#{template_name}.#{template_extension}" }.find{|tf| File.readable? tf}
   end
 
   def self.template
@@ -97,7 +110,11 @@ class Mustache
   def template
     return @template if @template
 
-    @template = self.class.template
+    if @template_path || @template_extension || @template_name || @template_file
+      @template = templateify(File.read(template_file))
+    else
+      @template = self.class.template
+    end
   end
 
   def template=(template)

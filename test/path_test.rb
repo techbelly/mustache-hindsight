@@ -14,4 +14,32 @@ class MustacheTest < Minitest::Test
     assert_equal 2, Mustache.template_path.size
     Mustache.template_path = old_path
   end
+
+  def test_override_found
+    expected = <<-data
+<VirtualHost *>
+  ServerAdmin override@mustache.com
+  ServerName example.com
+  DocumentRoot /var/www/example.com
+  RailsEnv production
+</VirtualHost>
+data
+    old_path = Mustache.template_path
+    old_extension = Mustache.template_extension
+
+    begin
+      base = File.dirname(__FILE__)
+      Mustache.template_extension = "conf"
+      Mustache.template_path = "#{base}/fixtures/override:#{base}/fixtures"
+      assert_equal expected, Mustache.render(:passenger, :stage => 'production',
+                                                         :server => 'example.com',
+                                                         :deploy_to => '/var/www/example.com')
+      Mustache.template_path = "#{base}/fixtures:#{base}/fixtures/override"
+      refute_equal expected, Mustache.render(:passenger, :stage => 'production',
+                                                         :server => 'example.com',
+                                                         :deploy_to => '/var/www/example.com')
+    ensure
+      Mustache.template_path, Mustache.template_extension = old_path, old_extension
+    end
+  end
 end

@@ -19,12 +19,15 @@ class Mustache
     case data
     when Hash
       ctx = data
+    when Symbol
+      self.template_name = data
     end
 
     tpl = case data
     when Hash
       templateify(template)
     when Symbol
+      templateify(template)
     else
       templateify(data)
     end
