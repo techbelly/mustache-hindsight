@@ -47,6 +47,10 @@ EOF
     def initialize(options = {})
       @options = options
       @option_inline_partials_at_compile_time = options[:inline_partials_at_compile_time]
+      if @option_inline_partials_at_compile_time
+        @partial_resolver = options[:partial_resolver]
+        raise ArgumentError.new "Missing or invalid partial_resolver" unless @partial_resolver.respond_to? :call
+      end
 
       self.otag ||= '{{'
       self.ctag ||= '}}'
@@ -243,6 +247,9 @@ EOF
 
     def scan_tag_open_partial content, fetch, padding, pre_match_position
       @result << if @option_inline_partials_at_compile_time
+        partial = @partial_resolver.call content
+        partial.gsub!(/^/, padding) unless padding.empty?
+        self.class.new(@options).compile partial
       else
         [:mustache, :partial, content, offset, padding]
       end

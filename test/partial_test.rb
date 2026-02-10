@@ -20,6 +20,16 @@ end_partial
     assert_equal "Again, success!", view.render
   end
 
+  def test_partial_inlining
+    view = Mustache.new :inline_partials_at_compile_time => true
+    view.template = '{{> test/fixtures/inner_partial}}'
+    view[:title] = 'success'
+
+    assert_equal "Again, success!", view.render
+
+    assert_equal false, view.template.tokens.flatten.include?(:partial)
+  end
+
   def test_view_partial_inherits_context
     klass = Class.new(TemplatePartial)
     view = klass.new
