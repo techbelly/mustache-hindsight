@@ -23,4 +23,8 @@ class TemplateTest2 < Minitest::Test
     @@template_text ||= File.read(File.dirname(__FILE__) + "/fixtures/simply_complicated.mustache")
     @template = Mustache::Template.new(@@template_text)
   end
+
+  def test_partials
+    assert_equal ["partial1", "partial2"], @template.partials
+  end
 end

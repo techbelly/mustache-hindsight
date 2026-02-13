@@ -26,5 +26,28 @@ class Mustache
     def tokens(src = @source)
       Parser.new(@options).compile(src)
     end
+
+    def partials
+      Template.recursor(tokens, []) do |token, section|
+        if token[1] == :partial
+          [ new_token=token, new_section=section, result=token[2], stop=true ]
+        else
+          [ new_token=token, new_section=section, result=nil, stop=false ]
+        end
+      end.flatten.reject(&:nil?).uniq
+    end
+
+    def self.recursor(toks, section, &block)
+      toks.map do |token|
+        next unless token.is_a? Array
+
+        if token.first == :mustache
+          new_token, new_section, result, stop = yield(token, section)
+          [ result ] + ( stop ? [] : recursor(new_token, new_section, &block))
+        else
+          recursor(token, section, &block)
+        end
+      end
+    end
   end
 end
