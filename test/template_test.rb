@@ -27,4 +27,8 @@ class TemplateTest2 < Minitest::Test
   def test_partials
     assert_equal ["partial1", "partial2"], @template.partials
   end
+
+  def test_sections
+    assert_equal ["friend", "friend.morr"], @template.sections
+  end
 end

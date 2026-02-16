@@ -27,6 +27,17 @@ class Mustache
       Parser.new(@options).compile(src)
     end
 
+    def sections
+      Template.recursor(tokens, []) do |token, section|
+        if [:section, :inverted_section].include?(token[1])
+          new_section=(section + [token[2][2][0]])
+          [ new_token=token[4], new_section, result=new_section.join('.'), stop=false ]
+        else
+          [ new_token=token, new_section=section, result=nil, stop=false ]
+        end
+      end.flatten.reject(&:nil?).uniq
+    end
+
     def partials
       Template.recursor(tokens, []) do |token, section|
         if token[1] == :partial
