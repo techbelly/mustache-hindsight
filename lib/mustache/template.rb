@@ -27,6 +27,18 @@ class Mustache
       Parser.new(@options).compile(src)
     end
 
+    def tags
+      Template.recursor(tokens, []) do |token, section|
+        if [:etag, :utag].include?(token[1])
+          [ new_token=nil, new_section=nil, result=((section + [token[2][2][0]]).join('.')), stop=true ]
+        elsif [:section, :inverted_section].include?(token[1])
+          [ new_token=token[4], new_section=(section + [token[2][2][0]]), result=nil, stop=false ]
+        else
+          [ new_token=token, new_section=section, result=nil, stop=false ]
+        end
+      end.flatten.reject(&:nil?).uniq
+    end
+
     def sections
       Template.recursor(tokens, []) do |token, section|
         if [:section, :inverted_section].include?(token[1])

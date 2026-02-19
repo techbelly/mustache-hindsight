@@ -24,6 +24,22 @@ class TemplateTest2 < Minitest::Test
     @template = Mustache::Template.new(@@template_text)
   end
 
+  def test_tags
+    assert_equal [
+      "yourname",
+      "HOME",
+      "friend.name",
+      "friend.morr.word",
+      "friend.morr.up",
+      "friend.morr.awesomesauce",
+      "friend.morr.hiss",
+      "friend.notinmorr",
+      "friend.person",
+      "love",
+      "triplestash"
+      ], @template.tags
+  end
+
   def test_partials
     assert_equal ["partial1", "partial2"], @template.partials
   end
