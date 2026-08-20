@@ -18,3 +18,7 @@ class DotNotation < Mustache
     "Normal"
   end
 end
+
+if $0 == __FILE__
+  puts DotNotation.to_html
+end

@@ -7,3 +7,7 @@ class Comments < Mustache
     "A Comedy of Errors"
   end
 end
+
+if $0 == __FILE__
+  puts Comments.to_html
+end

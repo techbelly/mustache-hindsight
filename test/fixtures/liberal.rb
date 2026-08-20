@@ -19,3 +19,7 @@ class Liberal < Mustache
     '123 Somewhere St'
   end
 end
+
+if $0 == __FILE__
+  puts Liberal.to_html
+end

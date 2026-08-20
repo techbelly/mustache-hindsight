@@ -30,3 +30,7 @@ class PartialWithModule < Mustache
     "Fair enough, right?"
   end
 end
+
+if $0 == __FILE__
+  puts PartialWithModule.to_html
+end

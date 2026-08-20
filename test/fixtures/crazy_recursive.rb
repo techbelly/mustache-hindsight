@@ -24,3 +24,7 @@ class CrazyRecursive < Mustache
      }]
   end
 end
+
+if $0 == __FILE__
+  puts CrazyRecursive.to_html
+end

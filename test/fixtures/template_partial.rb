@@ -11,3 +11,7 @@ class TemplatePartial < Mustache
     '-' * title.size
   end
 end
+
+if $0 == __FILE__
+  puts TemplatePartial.to_html
+end

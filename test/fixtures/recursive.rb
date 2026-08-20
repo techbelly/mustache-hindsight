@@ -7,3 +7,7 @@ class Recursive < Mustache
     false
   end
 end
+
+if $0 == __FILE__
+  puts Recursive.to_html
+end

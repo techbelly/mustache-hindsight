@@ -54,6 +54,14 @@ class Mustache
     @context ||= Context.new(self)
   end
 
+  def self.render_file(name, context = {})
+    render(partial(name), context)
+  end
+
+  def render_file(name, context = {})
+    self.class.render_file(name, context)
+  end
+
   def self.partial(name)
     self.new.partial(name)
   end
@@ -104,6 +112,9 @@ class Mustache
     file_path = "#{view_path}/#{file_name}.rb"
 
     return Mustache unless File.exist?(file_path)
+
+    require file_path.chomp('.rb')
+    rescued_const_get(name)
   end
 
   def self.compiled?

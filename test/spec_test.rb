@@ -20,6 +20,11 @@ class MustacheSpec < Minitest::Test
   end
 
   def setup_partials(test)
+    (test['partials'] || {}).each do |name, content|
+      File.open(File.join(@partials, "#{name}.mustache"), 'w') do |f|
+        f.print(content)
+      end
+    end
   end
 
   def assert_mustache_spec(test)
@@ -36,3 +41,19 @@ class MustacheSpec < Minitest::Test
 end
 
 spec_files = File.join(File.dirname(__FILE__), '..', 'ext', 'spec', 'specs', '*.yml')
+Dir[spec_files].each do |file|
+  spec = YAML.load_file(file)
+
+  klass_name = "Test" + File.basename(file, ".yml").sub(/~/, '').capitalize
+  instance_eval "class ::#{klass_name} < MustacheSpec; end"
+  test_suite = Kernel.const_get(klass_name)
+
+  test_suite.class_eval do
+    spec['tests'].each do |test|
+      define_method :"test_spec - #{test['name']}" do
+        setup_partials(test)
+        assert_mustache_spec(test)
+      end
+    end
+  end
+end

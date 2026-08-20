@@ -7,3 +7,7 @@ class Unescaped < Mustache
     "Bear > Shark"
   end
 end
+
+if $0 == __FILE__
+  puts Unescaped.to_html
+end

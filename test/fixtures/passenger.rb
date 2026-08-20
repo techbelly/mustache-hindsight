@@ -20,3 +20,7 @@ class Passenger < Mustache
     Time.now.strftime('%Y%m%d%H%M%S')
   end
 end
+
+if $0 == __FILE__
+  puts Passenger.to_text
+end

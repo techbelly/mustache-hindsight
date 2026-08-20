@@ -8,3 +8,7 @@ class Escaped < Mustache
     "Bear > Shark"
   end
 end
+
+if $0 == __FILE__
+  puts Escaped.to_html
+end

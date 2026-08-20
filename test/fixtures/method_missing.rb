@@ -12,3 +12,7 @@ class MethodMissing < Mustache
     method == :list
   end
 end
+
+if $0 == __FILE__
+  puts MethodMissing.to_html
+end

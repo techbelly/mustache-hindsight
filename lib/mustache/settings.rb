@@ -68,6 +68,11 @@ class Mustache
     @template_extension ||= self.class.template_extension
   end
 
+  def template_extension=(template_extension)
+    @template_extension = template_extension
+    @template = nil
+  end
+
   def self.template_name
     @template_name || underscore
   end
@@ -99,6 +104,11 @@ class Mustache
     @template_file || path.map{|p| "#{p}/#{template_name}.#{template_extension}" }.find{|tf| File.readable? tf}
   end
 
+  def template_file=(tf)
+    @template_file = tf
+    @template = nil
+  end
+
   def self.template
     @template ||= templateify(File.read(template_file))
   end
@@ -125,6 +135,10 @@ class Mustache
     @raise_on_context_miss
   end
 
+  def self.raise_on_context_miss=(boolean)
+    @raise_on_context_miss = boolean
+  end
+
   def raise_on_context_miss?
     self.class.raise_on_context_miss? || @raise_on_context_miss
   end
@@ -137,8 +151,16 @@ class Mustache
     @context_access_security_level
   end
 
+  def self.context_access_security_level=(integer)
+    @context_access_security_level = integer
+  end
+
   def context_access_security_level
     self.class.context_access_security_level || @context_access_security_level
+  end
+
+  def context_access_security_level=(integer)
+    @context_access_security_level = integer
   end
 
   def self.view_namespace

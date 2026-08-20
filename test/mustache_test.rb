@@ -306,6 +306,7 @@ data
     instance[:show] = false
     instance.instance_eval do
       def die
+        raise "bummer"
       end
     end
     instance.template = '{{#show}} <li>{{die}}</li> {{/show}} yay'
@@ -827,6 +828,7 @@ template
   def test_cast_to_hash_in_context
     hashlike = Object.new
     def hashlike.title
+      'title'
     end
     def hashlike.to_hash
       { title: 'title' }

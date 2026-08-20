@@ -27,3 +27,7 @@ class ComplexView < Mustache
     item.empty?
   end
 end
+
+if $0 == __FILE__
+  puts ComplexView.to_html
+end

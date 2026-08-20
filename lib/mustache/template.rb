@@ -5,6 +5,8 @@ require 'mustache/generator'
 
 class Mustache
   class Template
+    attr_reader :source
+
     def initialize(source, options = {})
       @source = source
       @options = options

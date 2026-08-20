@@ -24,3 +24,7 @@ class Lambda < Mustache
     lambda { |text| "{{= | =}}#{text}" }
   end
 end
+
+if $0 == __FILE__
+  puts Lambda.to_html(Lambda.template, :name => "Jonny")
+end

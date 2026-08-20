@@ -16,3 +16,7 @@ class Delimiters < Mustache
     "Then, surprisingly, it worked the final time."
   end
 end
+
+if $0 == __FILE__
+  puts Delimiters.to_html
+end

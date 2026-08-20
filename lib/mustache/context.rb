@@ -47,6 +47,12 @@ class Mustache
       fetch(name, nil)
     end
 
+    def has_key?(key)
+      fetch(key, false)
+    rescue ContextMiss
+      false
+    end
+
     def fetch(name, default = :__raise)
       @stack.each do |frame|
         next if frame == self
@@ -64,11 +70,13 @@ class Mustache
 
     def find(obj, key, default = nil)
       if mustache_in_stack.context_access_security_level == 5 and !obj.instance_of?(Hash)
+        return context_level_violation("Detected key access attempt for a non-Hash object using '#{key}'", default)
       end
 
       return find_in_hash(obj.to_hash, key, default) if obj.respond_to?(:to_hash)
 
       if mustache_in_stack.context_access_security_level >= 4
+        return context_level_violation("Detected method access attempt using '#{key}'", default)
       end
 
       unless obj.respond_to?(key)
@@ -77,9 +85,11 @@ class Mustache
       end
 
       if mustache_in_stack.context_access_security_level >= 3 && !obj.class.instance_methods(false).include?(key.to_sym)
+        return context_level_violation("Detected inherited method '#{key}'", default)
       end
 
       if mustache_in_stack.context_access_security_level >= 2 && MethodBlacklist.include?(key.to_s)
+        return context_level_violation("Detected blacklisted reflection-related key '#{key}'", default)
       end
 
       meth = obj.method(key) rescue proc { obj.send(key) }

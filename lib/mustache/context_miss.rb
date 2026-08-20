@@ -1,6 +1,11 @@
 class Mustache
   class ContextMiss < RuntimeError;  end
+  class ContextLevelViolation < ContextMiss;  end
   class Context
+    def context_level_violation(message, default = nil)
+      return default unless mustache_in_stack.raise_on_context_miss?
+      raise ContextLevelViolation.new(message)
+    end
   end
 
   MethodBlacklist = ["allocate", "attached_object", "superclass", "subclasses", "new", "autoload?", "autoload",

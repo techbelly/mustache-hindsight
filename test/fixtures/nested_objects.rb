@@ -28,3 +28,7 @@ class NestedObjects < Mustache
     item.empty?
   end
 end
+
+if $0 == __FILE__
+  puts NestedObjects.to_html
+end

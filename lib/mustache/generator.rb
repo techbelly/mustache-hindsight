@@ -19,6 +19,8 @@ class Mustache
         str(exp[1])
       when :mustache
         send("on_#{exp[1]}", *exp[2..-1])
+      else
+        raise "Unhandled exp: #{exp.first}"
       end
     end
 
@@ -26,6 +28,9 @@ class Mustache
       code = compile(content)
 
       proc_handling = if @option_static_lambdas
+        <<-compiled
+          v.call(lambda {|v| #{code}}.call(v)).to_s
+        compiled
       else
         <<-compiled
           t = Mustache::Template.new(v.call(#{raw.inspect}).to_s)

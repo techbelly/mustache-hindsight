@@ -18,3 +18,7 @@ module TestViews
     end
   end
 end
+
+if $0 == __FILE__
+  puts TestViews::Namespaced.to_html
+end
